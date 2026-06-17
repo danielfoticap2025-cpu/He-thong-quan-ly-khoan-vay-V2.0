@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  companyId   String   @unique // ID nhận diện từ RPA
+  name        String
+  companyName String?
+  loans       Loan[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Loan {
+  id          String   @id @default(cuid())
+  stt         String?
+  ngayVay     String?
+  ngayDenHan  String?
+  soTien      String?
+  loaiTien    String?
+  donVi       String?
+  thoiHan     String?
+  laiSuat     String?
+  laiCongDon  String?
+  phuTrach    String?
+  kiemSoat    String?
+  
+  congTyId    String
+  company     Company  @relation(fields: [congTyId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique // vd: "EXCHANGE_RATE_USD"
+  value       String
+  updatedAt   DateTime @updatedAt
+}
