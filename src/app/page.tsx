@@ -50,7 +50,7 @@ export default function Home() {
   const [loans, setLoans] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedBankTab, setSelectedBankTab] = useState<string>("ALL");
+  const [selectedBankTab, setSelectedBankTab] = useState<string>("VCB");
 
   const [exchangeRate, setExchangeRate] = useState<number>(25000);
   const [globalSummary, setGlobalSummary] = useState<any>(null);
@@ -231,7 +231,7 @@ export default function Home() {
       setPasswordInput("");
       setAuthError("");
       setLoans([]);
-      setSelectedBankTab("ALL");
+      setSelectedBankTab("VCB");
     }
   }, [selectedSheet]);
 
@@ -290,7 +290,9 @@ export default function Home() {
           <>
             <SummaryBlocks summary={globalSummary} title="Thống kê tổng hợp toàn hệ thống" />
             <div className="mb-8 flex flex-col items-start gap-4">
-              {sheets.map((sheet) => (
+              {sheets
+                .filter(sheet => sheet.id !== "VCB" && sheet.id !== "BIDV") // Ẩn các ngân hàng bị lưu nhầm từ trước
+                .map((sheet) => (
                 <button
                   key={sheet.id}
                   onClick={() => setSelectedSheet(sheet)}
@@ -363,13 +365,6 @@ export default function Home() {
             )}
 
             <div className="flex gap-4 mb-6">
-              <button 
-                onClick={() => setSelectedBankTab("ALL")}
-                className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center ${selectedBankTab === "ALL" ? "bg-purple-600 text-white border-purple-500" : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"} border`}
-              >
-                <span>Tất cả ngân hàng</span>
-                <span className="text-sm font-normal opacity-80 mt-1">{formatMoney(getBankTotal("ALL"))} VND</span>
-              </button>
               <button 
                 onClick={() => setSelectedBankTab("VCB")}
                 className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center ${selectedBankTab === "VCB" ? "bg-green-600 text-white border-green-500" : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"} border`}
