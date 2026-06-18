@@ -16,6 +16,7 @@ interface Loan {
   donVi?: string;
   thoiHan?: string;
   laiSuat?: string;
+  laiCongDon?: string;
 }
 
 function isDueSoon(dateStr: string) {
@@ -49,6 +50,7 @@ export default function Home() {
   const [loans, setLoans] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedBankTab, setSelectedBankTab] = useState<string>("ALL");
 
   const [exchangeRate, setExchangeRate] = useState<number>(25000);
   const [globalSummary, setGlobalSummary] = useState<any>(null);
@@ -83,6 +85,39 @@ export default function Home() {
   };
 
   const formatMoney = (n: number) => new Intl.NumberFormat('vi-VN').format(n || 0);
+
+  const formatLoanMoney = (val: string) => {
+    if (!val) return "-";
+    const num = parseInt(val.replace(/\./g, "").trim(), 10);
+    if (isNaN(num)) return val;
+    return new Intl.NumberFormat('vi-VN').format(num);
+  };
+
+  const formatInterest = (val: string) => {
+    if (!val || val === "0" || val === "-") return "-";
+    const num = parseFloat(val);
+    if (isNaN(num)) return val;
+    return new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + '%';
+  };
+
+  const filteredLoans = useMemo(() => {
+    if (selectedBankTab === "ALL") return loans;
+    return loans.filter(loan => (loan.donVi || "").toUpperCase().includes(selectedBankTab));
+  }, [loans, selectedBankTab]);
+
+  const getBankTotal = (bankId: string) => {
+    let totalVND = 0;
+    loans.forEach(loan => {
+      if (bankId === "ALL" || (loan.donVi || "").toUpperCase().includes(bankId)) {
+        const amountStr = (loan.soTien || "").replace(/\./g, "").trim();
+        const amount = parseInt(amountStr, 10);
+        if (!isNaN(amount) && (loan.loaiTien || "").toUpperCase() !== "USD") {
+           totalVND += amount;
+        }
+      }
+    });
+    return totalVND;
+  };
 
   const SummaryBlocks = ({ summary, title }: { summary: any, title?: string }) => {
     if (!summary) return null;
@@ -196,6 +231,7 @@ export default function Home() {
       setPasswordInput("");
       setAuthError("");
       setLoans([]);
+      setSelectedBankTab("ALL");
     }
   }, [selectedSheet]);
 
@@ -326,17 +362,43 @@ export default function Home() {
               </div>
             )}
 
+            <div className="flex gap-4 mb-6">
+              <button 
+                onClick={() => setSelectedBankTab("ALL")}
+                className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center ${selectedBankTab === "ALL" ? "bg-purple-600 text-white border-purple-500" : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"} border`}
+              >
+                <span>Tất cả ngân hàng</span>
+                <span className="text-sm font-normal opacity-80 mt-1">{formatMoney(getBankTotal("ALL"))} VND</span>
+              </button>
+              <button 
+                onClick={() => setSelectedBankTab("VCB")}
+                className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center ${selectedBankTab === "VCB" ? "bg-green-600 text-white border-green-500" : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"} border`}
+              >
+                <span>Vietcombank</span>
+                <span className="text-sm font-normal opacity-80 mt-1">{formatMoney(getBankTotal("VCB"))} VND</span>
+              </button>
+              <button 
+                onClick={() => setSelectedBankTab("BIDV")}
+                className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center ${selectedBankTab === "BIDV" ? "bg-blue-600 text-white border-blue-500" : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"} border`}
+              >
+                <span>BIDV</span>
+                <span className="text-sm font-normal opacity-80 mt-1">{formatMoney(getBankTotal("BIDV"))} VND</span>
+              </button>
+            </div>
+
             <div className="overflow-x-auto rounded-xl border border-gray-700 bg-gray-800 shadow-xl w-fit mx-auto max-w-full">
               <table className="text-left border-collapse whitespace-nowrap">
                   <thead>
                     <tr className="bg-gray-900/80 border-b border-gray-700 text-gray-400 uppercase text-xs tracking-wider">
                       <th className="p-4 font-semibold text-center">STT</th>
+                      <th className="p-4 font-semibold text-center">Ngày Vay</th>
                       <th className="p-4 font-semibold text-center">Ngày Đến Hạn</th>
                       <th className="p-4 font-semibold text-right">Số Tiền</th>
                       <th className="p-4 font-semibold text-center">Loại Tiền</th>
-                      <th className="p-4 font-semibold text-center">Đơn Vị</th>
                       <th className="p-4 font-semibold text-center">Thời Hạn</th>
                       <th className="p-4 font-semibold text-center">Lãi Suất</th>
+                      <th className="p-4 font-semibold text-right">Lãi C.Dồn</th>
+                      <th className="p-4 font-semibold text-center">Đơn Vị</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700/50 text-sm">
@@ -346,7 +408,7 @@ export default function Home() {
                           <p className="text-lg">Đang tải dữ liệu...</p>
                         </td>
                       </tr>
-                    ) : loans.length === 0 && !errorMsg ? (
+                    ) : filteredLoans.length === 0 && !errorMsg ? (
                       <tr>
                         <td colSpan={9} className="p-12 text-center text-gray-500">
                           <div className="text-4xl mb-3">📭</div>
@@ -354,15 +416,19 @@ export default function Home() {
                         </td>
                       </tr>
                     ) : (
-                      loans.map((loan, idx) => (
+                      filteredLoans.map((loan, idx) => (
                         <tr key={idx} className="hover:bg-gray-700/40 transition-colors group">
                           <td className="p-4 text-gray-400 text-center">{loan.stt || "-"}</td>
-                          <td className={`p-4 text-center ${isDueSoon(loan.ngayDenHan) ? 'font-bold text-red-400' : 'text-gray-300'}`}>{loan.ngayDenHan || "-"}</td>
-                          <td className="p-4 text-gray-300 text-right">{loan.soTien || "-"}</td>
+                          <td className="p-4 text-gray-400 text-center">{loan.ngayVay || "-"}</td>
+                          <td className={`p-4 text-center ${isDueSoon(loan.ngayDenHan || "") ? 'font-bold text-red-400' : 'text-gray-300'}`}>{loan.ngayDenHan || "-"}</td>
+                          <td className="p-4 text-gray-300 text-right">{formatLoanMoney(loan.soTien)}</td>
                           <td className="p-4 text-gray-400 text-center">{loan.loaiTien || "-"}</td>
-                          <td className={`p-4 text-center ${loan.donVi?.toUpperCase().includes('BIDV') ? 'text-blue-400 font-semibold' : loan.donVi?.toUpperCase().includes('VCB') ? 'text-green-400 font-semibold' : 'text-gray-400'}`}>{loan.donVi || "-"}</td>
                           <td className="p-4 text-gray-300 text-center">{loan.thoiHan || "-"}</td>
-                          <td className="p-4 text-gray-300 text-center">{loan.laiSuat || "-"}</td>
+                          <td className="p-4 text-purple-300 text-center font-medium">{formatInterest(loan.laiSuat)}</td>
+                          <td className="p-4 text-orange-300 text-right">{formatLoanMoney(loan.laiCongDon)}</td>
+                          <td className={`p-4 text-center ${loan.donVi?.toUpperCase().includes('BIDV') ? 'text-blue-400 font-semibold' : loan.donVi?.toUpperCase().includes('VCB') ? 'text-green-400 font-semibold' : 'text-gray-400'}`}>
+                             {loan.donVi?.toUpperCase().includes('BIDV') ? 'BIDV' : loan.donVi?.toUpperCase().includes('VCB') ? 'VCB' : loan.donVi}
+                          </td>
                         </tr>
                       ))
                     )}
