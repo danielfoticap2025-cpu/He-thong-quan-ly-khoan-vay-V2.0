@@ -112,7 +112,8 @@ export default function Home() {
         const amountStr = (loan.soTien || "").replace(/\./g, "").trim();
         const amount = parseInt(amountStr, 10);
         if (!isNaN(amount)) {
-           if ((loan.loaiTien || "").toUpperCase() === "USD") {
+           const type = (loan.loaiTien || "").toString().trim().toUpperCase();
+           if (type === "USD") {
                totalVND += (amount * 26500);
            } else {
                totalVND += amount;
