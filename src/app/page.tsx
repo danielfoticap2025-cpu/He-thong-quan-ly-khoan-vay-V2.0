@@ -111,8 +111,12 @@ export default function Home() {
       if (bankId === "ALL" || (loan.donVi || "").toUpperCase().includes(bankId)) {
         const amountStr = (loan.soTien || "").replace(/\./g, "").trim();
         const amount = parseInt(amountStr, 10);
-        if (!isNaN(amount) && (loan.loaiTien || "").toUpperCase() !== "USD") {
-           totalVND += amount;
+        if (!isNaN(amount)) {
+           if ((loan.loaiTien || "").toUpperCase() === "USD") {
+               totalVND += (amount * 26500);
+           } else {
+               totalVND += amount;
+           }
         }
       }
     });
