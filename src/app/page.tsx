@@ -52,7 +52,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [selectedBankTab, setSelectedBankTab] = useState<string>("VCB");
 
-  const [exchangeRate, setExchangeRate] = useState<number>(25000);
+  const [exchangeRate, setExchangeRate] = useState<number>(26500);
   const [globalSummary, setGlobalSummary] = useState<any>(null);
 
   const localSummary = useMemo(() => {
@@ -114,7 +114,7 @@ export default function Home() {
         if (!isNaN(amount)) {
            const type = (loan.loaiTien || "").toString().trim().toUpperCase();
            if (type === "USD") {
-               totalVND += (amount * 26500);
+               totalVND += (amount * exchangeRate);
            } else {
                totalVND += amount;
            }
@@ -201,7 +201,7 @@ export default function Home() {
         setErrorMsg(data.error || "Lỗi tải dữ liệu");
       } else {
         setLoans(data.loans || []);
-        setExchangeRate(data.exchangeRate || 25000);
+        setExchangeRate(data.exchangeRate || 26500);
       }
     } catch (e: any) {
       setErrorMsg("Không thể kết nối đến máy chủ.");

@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       where: { key: "EXCHANGE_RATE" }
     });
     
-    const exchangeRate = setting ? parseInt(setting.value, 10) : 25000;
+    const exchangeRate = setting ? parseInt(setting.value, 10) : 26500;
 
     return NextResponse.json({
       loans: company.loans,
