@@ -270,13 +270,6 @@ export default function Home() {
                 ⬅️ Chọn công ty khác
               </button>
             )}
-            <button 
-              onClick={handleSendEmails}
-              disabled={loading}
-              className="bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-lg shadow-lg font-semibold transition-all disabled:opacity-50 flex items-center gap-2"
-            >
-              {loading ? "⏳ Đang gửi..." : "📧 Gửi thông báo phụ trách khoản vay"}
-            </button>
           </div>
         </header>
 
@@ -351,13 +344,6 @@ export default function Home() {
                 <span className="text-2xl font-bold text-blue-400">{loans.length}</span>
               </div>
               
-              <button 
-                onClick={fetchLoans}
-                disabled={loading}
-                className="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white px-5 py-2 rounded-lg shadow-lg font-semibold transition-all disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? "⏳ Đang tải..." : "🔄 Đồng bộ dữ liệu"}
-              </button>
             </div>
 
             {errorMsg && (

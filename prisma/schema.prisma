@@ -40,7 +40,15 @@ model Loan {
 
 model SystemSetting {
   id          String   @id @default(cuid())
-  key         String   @unique // vd: "EXCHANGE_RATE_USD"
+  key         String   @unique // vd: "EXCHANGE_RATE_USD", "SENDER_EMAIL", "SENDER_PASSWORD", "MANAGERS_BCC"
   value       String
   updatedAt   DateTime @updatedAt
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

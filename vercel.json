@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/notify-loans",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}
