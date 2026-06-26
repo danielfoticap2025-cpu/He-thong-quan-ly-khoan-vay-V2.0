@@ -45,4 +45,4 @@ model SystemSetting {
   key         String   @unique // vd: "EXCHANGE_RATE_USD", "SENDER_EMAIL", "SENDER_PASSWORD", "MANAGERS_BCC"
   value       String
   updatedAt   DateTime @updatedAt
-
+}
