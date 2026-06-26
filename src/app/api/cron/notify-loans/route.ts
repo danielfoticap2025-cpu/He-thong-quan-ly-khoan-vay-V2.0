@@ -100,12 +100,12 @@ export async function GET(request: Request) {
             <div style="overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 20px;">
               <table style="border-collapse: collapse; width: 100%; min-width: 600px;">
                 <thead>
-                  <tr style="background-color: #f8fafc; text-align: left; border-bottom: 2px solid #e2e8f0;">
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">STT (Khế ước)</th>
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Số tiền</th>
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Loại tiền</th>
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Ngày đến hạn</th>
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Trạng thái</th>
+                  <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: right;">Số tiền</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: right;">Lãi cộng dồn</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Loại tiền</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Ngày đến hạn</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -121,11 +121,11 @@ export async function GET(request: Request) {
 
           htmlTable += `
                   <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 12px 16px; color: #475569; font-size: 14px;">${l.stt || 'N/A'}</td>
-                    <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 15px;">${formatCurrency(l.soTien)}</td>
-                    <td style="padding: 12px 16px; color: #64748b; font-size: 14px;">${l.loaiTien || 'VND'}</td>
-                    <td style="padding: 12px 16px; color: #475569; font-size: 14px; font-weight: 500;">${l.ngayDenHan}</td>
-                    <td style="padding: 12px 16px; font-size: 14px;">${statusText}</td>
+                    <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 15px; text-align: right;">${formatCurrency(l.soTien)}</td>
+                    <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 15px; text-align: right;">${formatCurrency(l.laiCongDon)}</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-size: 14px; text-align: center;">${l.loaiTien || 'VND'}</td>
+                    <td style="padding: 12px 16px; color: #475569; font-size: 14px; font-weight: 500; text-align: center;">${l.ngayDenHan}</td>
+                    <td style="padding: 12px 16px; font-size: 14px; text-align: center;">${statusText}</td>
                   </tr>
           `;
         });
