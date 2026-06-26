@@ -36,32 +36,37 @@ export async function GET(request: Request) {
     const senderPassword = senderPasswordSetting?.value || "";
     const managersBcc = managersBccSetting?.value ? managersBccSetting.value.split(',').map(s => s.trim()) : [];
 
-    // 2. Fetch contacts from DB
-    const dbContacts = await prisma.contact.findMany();
-
-    // 3. Fetch loans
-    const loans = await prisma.loan.findMany({
-      include: { company: true }
+    // 2. Fetch all companies and their loans
+    const companies = await prisma.company.findMany({
+      include: { loans: true }
     });
 
     const TARGET_DAYS = [10, 3, 1, 0];
-    const notificationsToSent: Record<string, any[]> = {};
+    const notificationsToSent: Record<string, { companyName: string, toEmail: string, personName: string, loans: any[] }> = {};
 
-    for (const loan of loans) {
-      if (!loan.ngayDenHan || !loan.phuTrach) continue;
-      
-      const dueDate = parseDate(loan.ngayDenHan);
-      if (!dueDate) continue;
+    for (const company of companies) {
+      if (!company.phuTrachEmail) continue; // Skip companies without an assigned email
 
-      const diff = getDaysDiff(dueDate);
-      
-      if (TARGET_DAYS.includes(diff)) {
-         const person = loan.phuTrach.trim();
-         if (!notificationsToSent[person]) notificationsToSent[person] = [];
-         notificationsToSent[person].push({
-           ...loan,
-           daysLeft: diff
-         });
+      const dueLoans = [];
+      for (const loan of company.loans) {
+        if (!loan.ngayDenHan) continue;
+        
+        const dueDate = parseDate(loan.ngayDenHan);
+        if (!dueDate) continue;
+
+        const diff = getDaysDiff(dueDate);
+        if (TARGET_DAYS.includes(diff)) {
+          dueLoans.push({ ...loan, daysLeft: diff });
+        }
+      }
+
+      if (dueLoans.length > 0) {
+        notificationsToSent[company.id] = {
+          companyName: company.name,
+          toEmail: company.phuTrachEmail,
+          personName: company.phuTrachName || "Bạn",
+          loans: dueLoans
+        };
       }
     }
 
@@ -77,24 +82,16 @@ export async function GET(request: Request) {
         },
       });
 
-      for (const [person, personLoans] of Object.entries(notificationsToSent)) {
-        // Find email in DB contacts
-        const contact = dbContacts.find(c => c.name.toLowerCase() === person.toLowerCase());
-        const toEmail = contact ? contact.email : null;
-
-        if (!toEmail) {
-           results.push({ person, status: "No email mapped in Database", loansCount: personLoans.length });
-           continue;
-        }
-
+      for (const [companyId, data] of Object.entries(notificationsToSent)) {
+        
         // Build HTML table
         let htmlTable = `
           <div style="font-family: Arial, sans-serif; color: #333;">
-            <h2 style="color: #d32f2f;">Xin chào ${person},</h2>
-            <p>Dưới đây là danh sách các khoản vay <b>sắp đến hạn</b> cần bạn theo dõi và xử lý gấp:</p>
+            <h2 style="color: #d32f2f;">Xin chào ${data.personName},</h2>
+            <p>Dưới đây là danh sách các khoản vay <b>sắp đến hạn</b> của công ty <b>${data.companyName}</b> cần bạn theo dõi và xử lý gấp:</p>
             <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%; border: 1px solid #ddd;">
               <tr style="background-color: #f8f9fa; text-align: left;">
-                <th>Công ty / Đơn vị</th>
+                <th>STT (Khế ước)</th>
                 <th>Số tiền</th>
                 <th>Loại tiền</th>
                 <th>Ngày đến hạn</th>
@@ -102,17 +99,15 @@ export async function GET(request: Request) {
               </tr>
         `;
 
-        personLoans.forEach(l => {
+        data.loans.forEach(l => {
           let statusText = "";
           if (l.daysLeft === 0) statusText = "<span style='color:red; font-weight:bold;'>ĐẾN HẠN HÔM NAY</span>";
           else if (l.daysLeft === 1) statusText = "<span style='color:#e65100; font-weight:bold;'>Ngày mai đến hạn</span>";
           else statusText = `<span style='color:#f57c00; font-weight:bold;'>Còn ${l.daysLeft} ngày</span>`;
 
-          const companyName = (l.company && l.company.name) ? l.company.name : (l.donVi || 'N/A');
-
           htmlTable += `
               <tr>
-                <td>${companyName}</td>
+                <td>${l.stt || 'N/A'}</td>
                 <td style="font-weight:bold;">${l.soTien || '0'}</td>
                 <td>${l.loaiTien || 'VND'}</td>
                 <td>${l.ngayDenHan}</td>
@@ -131,19 +126,19 @@ export async function GET(request: Request) {
         try {
           await transporter.sendMail({
             from: `"Hệ Thống Cảnh Báo" <${senderEmail}>`,
-            to: toEmail,
+            to: data.toEmail,
             bcc: managersBcc,
-            subject: `🚨 [CẢNH BÁO] Có ${personLoans.length} khoản vay sắp đến hạn - Phụ trách: ${person}`,
+            subject: `🚨 [CẢNH BÁO] Có ${data.loans.length} khoản vay sắp đến hạn - Công ty ${data.companyName}`,
             html: htmlTable
           });
-          results.push({ person, status: "Sent", email: toEmail, loansCount: personLoans.length });
+          results.push({ company: data.companyName, status: "Sent", email: data.toEmail, loansCount: data.loans.length });
         } catch (err: any) {
-          results.push({ person, status: "Error", email: toEmail, error: err.message });
+          results.push({ company: data.companyName, status: "Error", email: data.toEmail, error: err.message });
         }
       }
     } else {
-       for (const [person, personLoans] of Object.entries(notificationsToSent)) {
-         results.push({ person, status: "Simulation (Sender Email/Password not configured in DB)", loansCount: personLoans.length });
+       for (const [companyId, data] of Object.entries(notificationsToSent)) {
+         results.push({ company: data.companyName, status: "Simulation (Sender Email/Password not configured in DB)", loansCount: data.loans.length });
        }
     }
 

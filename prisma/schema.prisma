@@ -8,13 +8,15 @@ datasource db {
 }
 
 model Company {
-  id          String   @id @default(cuid())
-  companyId   String   @unique // ID nhận diện từ RPA
-  name        String
-  companyName String?
-  loans       Loan[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  companyId     String   @unique // ID nhận diện từ RPA
+  name          String
+  companyName   String?
+  phuTrachName  String?
+  phuTrachEmail String?
+  loans         Loan[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Loan {
@@ -43,12 +45,4 @@ model SystemSetting {
   key         String   @unique // vd: "EXCHANGE_RATE_USD", "SENDER_EMAIL", "SENDER_PASSWORD", "MANAGERS_BCC"
   value       String
   updatedAt   DateTime @updatedAt
-}
 
-model Contact {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  email     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
