@@ -122,7 +122,7 @@ export default function SettingsPage() {
                 <div key={c.id} className="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-3 shadow-sm hover:border-gray-600 transition-colors">
                   {editingId === c.id ? (
                     <div className="flex flex-col gap-3">
-                      <div className="font-bold text-blue-300 text-lg">{c.name} {c.companyName ? `(${c.companyName})` : ''}</div>
+                      <div className="font-bold text-blue-300 text-lg">{c.name} {c.companyName && c.companyName !== c.name ? `(${c.companyName})` : ''}</div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <input type="text" value={editName} onChange={e => setEditName(e.target.value)} placeholder="Tên nhân viên phụ trách" className="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500 text-sm" />
                         <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="Địa chỉ Email" className="w-full bg-gray-800 border border-gray-600 rounded-lg p-2 text-white focus:outline-none focus:border-blue-500 text-sm" />
@@ -135,7 +135,7 @@ export default function SettingsPage() {
                   ) : (
                     <div className="flex flex-col md:flex-row justify-between md:items-center gap-3">
                       <div>
-                        <div className="font-bold text-gray-200 text-lg">{c.name} {c.companyName ? `(${c.companyName})` : ''}</div>
+                        <div className="font-bold text-gray-200 text-lg">{c.name} {c.companyName && c.companyName !== c.name ? `(${c.companyName})` : ''}</div>
                         <div className="text-sm mt-2 flex flex-col gap-1">
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500 w-24">Phụ trách:</span> 

@@ -7,6 +7,14 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const companies = await prisma.company.findMany({
+      where: {
+        NOT: {
+          name: {
+            startsWith: 'Ngân hàng',
+            mode: 'insensitive'
+          }
+        }
+      },
       orderBy: { name: 'asc' }
     });
     return NextResponse.json({ success: true, companies });
