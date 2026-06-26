@@ -82,44 +82,63 @@ export async function GET(request: Request) {
         },
       });
 
+      const formatCurrency = (val: string) => {
+        if (!val) return "0";
+        const num = parseInt(val.toString().replace(/[^0-9]/g, ''), 10);
+        if (isNaN(num)) return val;
+        return num.toLocaleString('vi-VN').replace(/,/g, '.');
+      };
+
       for (const [companyId, data] of Object.entries(notificationsToSent)) {
         
         // Build HTML table
         let htmlTable = `
-          <div style="font-family: Arial, sans-serif; color: #333;">
-            <h2 style="color: #d32f2f;">Xin chào ${data.personName},</h2>
-            <p>Dưới đây là danh sách các khoản vay <b>sắp đến hạn</b> của công ty <b>${data.companyName}</b> cần bạn theo dõi và xử lý gấp:</p>
-            <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%; border: 1px solid #ddd;">
-              <tr style="background-color: #f8f9fa; text-align: left;">
-                <th>STT (Khế ước)</th>
-                <th>Số tiền</th>
-                <th>Loại tiền</th>
-                <th>Ngày đến hạn</th>
-                <th>Trạng thái</th>
-              </tr>
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; max-width: 800px; margin: 0 auto; background-color: #ffffff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <h2 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-top: 0;">Xin chào <span style="color: #2563eb;">${data.personName}</span>,</h2>
+            <p style="font-size: 16px; color: #475569; line-height: 1.5;">Dưới đây là danh sách các khoản vay <b>sắp đến hạn</b> của <b>${data.companyName}</b>:</p>
+            
+            <div style="overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 20px;">
+              <table style="border-collapse: collapse; width: 100%; min-width: 600px;">
+                <thead>
+                  <tr style="background-color: #f8fafc; text-align: left; border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">STT (Khế ước)</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Số tiền</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Loại tiền</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Ngày đến hạn</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px;">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
         `;
 
-        data.loans.forEach(l => {
+        data.loans.forEach((l, index) => {
           let statusText = "";
-          if (l.daysLeft === 0) statusText = "<span style='color:red; font-weight:bold;'>ĐẾN HẠN HÔM NAY</span>";
-          else if (l.daysLeft === 1) statusText = "<span style='color:#e65100; font-weight:bold;'>Ngày mai đến hạn</span>";
-          else statusText = `<span style='color:#f57c00; font-weight:bold;'>Còn ${l.daysLeft} ngày</span>`;
+          if (l.daysLeft === 0) statusText = "<span style='color: #dc2626; font-weight: 700; background-color: #fee2e2; padding: 4px 8px; border-radius: 4px;'>ĐẾN HẠN HÔM NAY</span>";
+          else if (l.daysLeft === 1) statusText = "<span style='color: #ea580c; font-weight: 600;'>Ngày mai đến hạn</span>";
+          else statusText = `<span style='color: #d97706; font-weight: 500;'>Còn ${l.daysLeft} ngày</span>`;
+
+          const rowBg = index % 2 === 0 ? '#ffffff' : '#f8fafc';
 
           htmlTable += `
-              <tr>
-                <td>${l.stt || 'N/A'}</td>
-                <td style="font-weight:bold;">${l.soTien || '0'}</td>
-                <td>${l.loaiTien || 'VND'}</td>
-                <td>${l.ngayDenHan}</td>
-                <td>${statusText}</td>
-              </tr>
+                  <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px 16px; color: #475569; font-size: 14px;">${l.stt || 'N/A'}</td>
+                    <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 15px;">${formatCurrency(l.soTien)}</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-size: 14px;">${l.loaiTien || 'VND'}</td>
+                    <td style="padding: 12px 16px; color: #475569; font-size: 14px; font-weight: 500;">${l.ngayDenHan}</td>
+                    <td style="padding: 12px 16px; font-size: 14px;">${statusText}</td>
+                  </tr>
           `;
         });
 
         htmlTable += `
-            </table>
-            <br>
-            <p style="font-style: italic; color: #666;">Tin nhắn này được gửi tự động từ Hệ Thống Quản Lý Khoản Vay.</p>
+                </tbody>
+              </table>
+            </div>
+            
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
+              <p style="color: #059669; font-size: 16px; font-weight: bold; margin-bottom: 8px;">Chúc bạn ngày mới vui vẻ và làm việc hiệu quả!</p>
+              <p style="font-style: italic; color: #94a3b8; font-size: 12px; margin-top: 12px;">Tin nhắn này được gửi tự động từ Hệ Thống Quản Lý Khoản Vay.</p>
+            </div>
           </div>
         `;
 
@@ -128,7 +147,7 @@ export async function GET(request: Request) {
             from: `"Hệ Thống Cảnh Báo" <${senderEmail}>`,
             to: data.toEmail,
             bcc: managersBcc,
-            subject: `🚨 [CẢNH BÁO] Có ${data.loans.length} khoản vay sắp đến hạn - Công ty ${data.companyName}`,
+            subject: `🚨 Các khoản vay sắp đến hạn - ${data.companyName}`,
             html: htmlTable
           });
           results.push({ company: data.companyName, status: "Sent", email: data.toEmail, loansCount: data.loans.length });
