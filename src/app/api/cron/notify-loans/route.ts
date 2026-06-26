@@ -101,8 +101,8 @@ export async function GET(request: Request) {
               <table style="border-collapse: collapse; width: 100%; min-width: 600px;">
                 <thead>
                   <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: right;">Số tiền</th>
-                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: right;">Lãi cộng dồn</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Số tiền</th>
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Lãi cộng dồn</th>
                     <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Loại tiền</th>
                     <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Ngày đến hạn</th>
                     <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Trạng thái</th>
