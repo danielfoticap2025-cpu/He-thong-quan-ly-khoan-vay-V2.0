@@ -286,18 +286,38 @@ export default function Home() {
         {/* Màn hình chọn công ty */}
         {!selectedSheet && (
           <>
-            <SummaryBlocks summary={globalSummary} title="Thống kê tổng hợp toàn hệ thống" />
-            <div className="mb-8 flex flex-col items-start gap-4">
+            <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+              <h2 className="text-2xl font-bold text-gray-200">Danh sách các công ty</h2>
+              {globalSummary?.lastSyncTime && (
+                 <div className="bg-gray-800/80 px-4 py-2 rounded-lg border border-gray-700 shadow-md flex items-center gap-2">
+                    <span className="text-gray-400 text-sm">Thời gian cập nhật dữ liệu:</span>
+                    <span className="text-emerald-400 font-bold text-sm">
+                      {new Date(globalSummary.lastSyncTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + " - " + new Date(globalSummary.lastSyncTime).toLocaleDateString('vi-VN')}
+                    </span>
+                 </div>
+              )}
+            </div>
+            
+            <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sheets
-                .filter(sheet => sheet.id !== "VCB" && sheet.id !== "BIDV") // Ẩn các ngân hàng bị lưu nhầm từ trước
+                .filter(sheet => !sheet.id.toUpperCase().includes("VCB") && !sheet.id.toUpperCase().includes("BIDV") && !sheet.name.toUpperCase().startsWith("NGÂN HÀNG")) // Ẩn các ngân hàng bị lưu nhầm từ trước
                 .map((sheet) => (
                 <button
                   key={sheet.id}
                   onClick={() => setSelectedSheet(sheet)}
-                  className="bg-gray-800 border border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg text-left w-full max-w-md flex items-center justify-between group"
+                  className="relative overflow-hidden bg-gray-800/60 backdrop-blur-sm border border-gray-700 hover:border-blue-500/50 hover:bg-gray-800 text-gray-300 hover:text-white p-6 rounded-2xl font-bold transition-all shadow-lg hover:shadow-blue-900/20 text-left w-full flex flex-col justify-center group"
                 >
-                  <span>{sheet.companyName || sheet.name}</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">➡️</span>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-inner">
+                        🏢
+                      </div>
+                      <span className="text-lg tracking-wide group-hover:text-blue-200 transition-colors leading-tight">{sheet.companyName || sheet.name}</span>
+                    </div>
+                    <span className="opacity-0 group-hover:opacity-100 transition-all text-blue-400 -translate-x-4 group-hover:translate-x-0 duration-300 text-xl flex-shrink-0">
+                      ➜
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>

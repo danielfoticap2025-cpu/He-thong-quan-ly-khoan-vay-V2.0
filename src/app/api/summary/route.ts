@@ -25,11 +25,15 @@ export async function GET() {
       }
     });
 
+    const latestCompany = await prisma.company.findFirst({ orderBy: { updatedAt: 'desc' } });
+    const lastSyncTime = latestCompany?.updatedAt ? latestCompany.updatedAt.toISOString() : null;
+
     return NextResponse.json({
       totalVND,
       totalUSD,
       totalConvertedVND: totalVND + (totalUSD * exchangeRate),
-      exchangeRate
+      exchangeRate,
+      lastSyncTime
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -12,10 +12,18 @@ export default function SettingsPage() {
   const [senderPassword, setSenderPassword] = useState("");
   const [managersBcc, setManagersBcc] = useState("");
   
+  const [globalSummary, setGlobalSummary] = useState<any>(null);
+  
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const fetchData = async () => {
+    try {
+      const resSum = await fetch("/api/summary");
+      if (resSum.ok) {
+        setGlobalSummary(await resSum.json());
+      }
+    } catch(e) {}
     try {
       const resC = await fetch("/api/companies");
       const dataC = await resC.json();
@@ -80,6 +88,27 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold text-blue-400">⚙️ Cấu hình Hệ thống Cảnh báo</h1>
           <a href="/" className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg border border-gray-700 shadow-lg font-semibold transition-all flex items-center gap-2">⬅️ Trở về Dashboard</a>
         </div>
+
+        {globalSummary && (
+          <div className="mb-8 p-6 bg-gray-800/80 rounded-2xl border border-gray-700 shadow-xl w-full backdrop-blur-sm">
+            <h3 className="text-xl font-bold text-gray-200 mb-4">Thống kê tổng hợp toàn hệ thống</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gray-900/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                 <div className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">Tổng dư nợ quy đổi VND</div>
+                 <div className="text-3xl font-bold text-emerald-400">{new Intl.NumberFormat('vi-VN').format(globalSummary.totalConvertedVND || 0)} <span className="text-lg font-normal">VND</span></div>
+              </div>
+              <div className="bg-gray-900/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                 <div className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">Dư nợ VND</div>
+                 <div className="text-3xl font-bold text-blue-400">{new Intl.NumberFormat('vi-VN').format(globalSummary.totalVND || 0)} <span className="text-lg font-normal">VND</span></div>
+              </div>
+              <div className="bg-gray-900/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                 <div className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">Dư nợ USD quy đổi</div>
+                 <div className="text-3xl font-bold text-purple-400">{new Intl.NumberFormat('vi-VN').format((globalSummary.totalUSD || 0) * (globalSummary.exchangeRate || 26500))} <span className="text-lg font-normal">VND</span></div>
+                 <div className="text-sm text-gray-500 mt-2 font-medium">(Dư nợ gốc: {new Intl.NumberFormat('vi-VN').format(globalSummary.totalUSD || 0)} USD)</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cài đặt Server */}
