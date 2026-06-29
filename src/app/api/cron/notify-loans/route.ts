@@ -139,14 +139,14 @@ export async function GET(request: Request) {
             
             <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
               <p style="color: #059669; font-size: 16px; font-weight: bold; margin-bottom: 8px;">Chúc bạn ngày mới vui vẻ và làm việc hiệu quả!</p>
-              <p style="font-style: italic; color: #94a3b8; font-size: 12px; margin-top: 12px;">Tin nhắn này được gửi tự động từ Hệ Thống Quản Lý Khoản Vay.</p>
+              <p style="font-style: italic; color: #94a3b8; font-size: 12px; margin-top: 12px;">Tin nhắn này được gửi tự động từ Hệ thống quản lý tín dụng.</p>
             </div>
           </div>
         `;
 
         try {
           await transporter.sendMail({
-            from: `"Hệ Thống Cảnh Báo" <${senderEmail}>`,
+            from: `"Hệ thống quản lý tín dụng" <${senderEmail}>`,
             to: data.toEmail,
             bcc: managersBcc,
             subject: `🚨 Các khoản vay sắp đến hạn - ${data.companyName}`,

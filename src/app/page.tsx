@@ -253,7 +253,7 @@ export default function Home() {
         <header className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-              Hệ thống quản lý khoản vay các công ty
+              Hệ thống quản lý tín dụng
             </h1>
             {selectedSheet && (
               <p className="text-xl text-blue-300 mt-2 font-medium">
