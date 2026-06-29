@@ -101,6 +101,7 @@ export async function GET(request: Request) {
               <table style="border-collapse: collapse; width: 100%; min-width: 600px;">
                 <thead>
                   <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Đơn vị</th>
                     <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Số tiền</th>
                     <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Lãi cộng dồn</th>
                     <th style="padding: 14px 16px; color: #334155; font-weight: 600; font-size: 14px; text-align: center;">Loại tiền</th>
@@ -121,6 +122,7 @@ export async function GET(request: Request) {
 
           htmlTable += `
                   <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 14px; text-align: center;">${l.donVi || '-'}</td>
                     <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 15px; text-align: right;">${formatCurrency(l.soTien)}</td>
                     <td style="padding: 12px 16px; color: #0f172a; font-weight: 600; font-size: 15px; text-align: right;">${formatCurrency(l.laiCongDon)}</td>
                     <td style="padding: 12px 16px; color: #64748b; font-size: 14px; text-align: center;">${l.loaiTien || 'VND'}</td>
