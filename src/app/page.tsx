@@ -392,8 +392,8 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-gray-700 bg-gray-800 shadow-xl w-fit mx-auto max-w-full">
-              <table className="text-left border-collapse whitespace-nowrap">
+            <div className="w-full overflow-x-auto rounded-xl border border-gray-700 bg-gray-800 shadow-xl">
+              <table className="text-left border-collapse whitespace-nowrap min-w-full">
                   <thead>
                     <tr className="bg-gray-900/80 border-b border-gray-700 text-gray-400 uppercase text-xs tracking-wider">
                       <th className="p-4 font-semibold text-center">STT</th>
