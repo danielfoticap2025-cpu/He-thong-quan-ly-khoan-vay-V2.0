@@ -59,10 +59,18 @@ export default function Home() {
     let totalVND = 0;
     let totalUSD = 0;
     loans.forEach(loan => {
-       const amountStr = (loan.soTien || "").replace(/\./g, "").trim();
-       const amount = parseInt(amountStr, 10);
+       const type = (loan.loaiTien || "").toString().trim().toUpperCase();
+       let amount = 0;
+       if (type === "USD") {
+           // USD có thể có thập phân (vd: 224.65)
+           amount = parseFloat((loan.soTien || "").toString().replace(/,/g, "."));
+       } else {
+           // VND có dấu chấm ngăn cách hàng nghìn (vd: 500.000)
+           const amountStr = (loan.soTien || "").toString().replace(/\./g, "").trim();
+           amount = parseInt(amountStr, 10);
+       }
+
        if (!isNaN(amount)) {
-          const type = (loan.loaiTien || "").toString().trim().toUpperCase();
           if (type === "USD") totalUSD += amount;
           else totalVND += amount;
        }
@@ -86,11 +94,18 @@ export default function Home() {
 
   const formatMoney = (n: number) => new Intl.NumberFormat('vi-VN').format(n || 0);
 
-  const formatLoanMoney = (val: string) => {
+  const formatLoanMoney = (val: string, loaiTien?: string) => {
     if (!val) return "-";
-    const num = parseInt(val.replace(/\./g, "").trim(), 10);
-    if (isNaN(num)) return val;
-    return new Intl.NumberFormat('vi-VN').format(num);
+    const type = (loaiTien || "").toString().trim().toUpperCase();
+    if (type === "USD") {
+      const num = parseFloat(val.toString().replace(/,/g, "."));
+      if (isNaN(num)) return val;
+      return new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num);
+    } else {
+      const num = parseInt(val.toString().replace(/\./g, "").trim(), 10);
+      if (isNaN(num)) return val;
+      return new Intl.NumberFormat('vi-VN').format(num);
+    }
   };
 
   const formatInterest = (val: string) => {
@@ -109,10 +124,16 @@ export default function Home() {
     let totalVND = 0;
     loans.forEach(loan => {
       if (bankId === "ALL" || (loan.donVi || "").toUpperCase().includes(bankId)) {
-        const amountStr = (loan.soTien || "").replace(/\./g, "").trim();
-        const amount = parseInt(amountStr, 10);
+        const type = (loan.loaiTien || "").toString().trim().toUpperCase();
+        let amount = 0;
+        if (type === "USD") {
+            amount = parseFloat((loan.soTien || "").toString().replace(/,/g, "."));
+        } else {
+            const amountStr = (loan.soTien || "").toString().replace(/\./g, "").trim();
+            amount = parseInt(amountStr, 10);
+        }
+
         if (!isNaN(amount)) {
-           const type = (loan.loaiTien || "").toString().trim().toUpperCase();
            if (type === "USD") {
                totalVND += (amount * exchangeRate);
            } else {
@@ -390,6 +411,13 @@ export default function Home() {
                 <span>BIDV</span>
                 <span className="text-sm font-normal opacity-80 mt-1">{formatMoney(getBankTotal("BIDV"))} VND</span>
               </button>
+              <button 
+                onClick={() => setSelectedBankTab("SEABANK")}
+                className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex flex-col items-center justify-center ${selectedBankTab === "SEABANK" ? "bg-red-600 text-white border-red-500" : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"} border`}
+              >
+                <span>Seabank</span>
+                <span className="text-sm font-normal opacity-80 mt-1">{formatMoney(getBankTotal("SEABANK"))} VND</span>
+              </button>
             </div>
 
             <div className="w-full overflow-x-auto rounded-xl border border-gray-700 bg-gray-800 shadow-xl">
@@ -427,13 +455,13 @@ export default function Home() {
                           <td className="p-4 text-gray-400 text-center">{loan.stt || "-"}</td>
                           <td className="p-4 text-gray-400 text-center">{loan.ngayVay || "-"}</td>
                           <td className={`p-4 text-center ${isDueSoon(loan.ngayDenHan || "") ? 'font-bold text-red-400' : 'text-gray-300'}`}>{loan.ngayDenHan || "-"}</td>
-                          <td className="p-4 text-gray-300 text-right">{formatLoanMoney(loan.soTien)}</td>
+                          <td className="p-4 text-gray-300 text-right">{formatLoanMoney(loan.soTien, loan.loaiTien)}</td>
                           <td className="p-4 text-gray-400 text-center">{loan.loaiTien || "-"}</td>
                           <td className="p-4 text-gray-300 text-center">{loan.thoiHan || "-"}</td>
                           <td className="p-4 text-purple-300 text-center font-medium">{formatInterest(loan.laiSuat)}</td>
-                          <td className="p-4 text-orange-300 text-right">{formatLoanMoney(loan.laiCongDon)}</td>
-                          <td className={`p-4 text-center ${loan.donVi?.toUpperCase().includes('BIDV') ? 'text-blue-400 font-semibold' : loan.donVi?.toUpperCase().includes('VCB') ? 'text-green-400 font-semibold' : 'text-gray-400'}`}>
-                             {loan.donVi?.toUpperCase().includes('BIDV') ? 'BIDV' : loan.donVi?.toUpperCase().includes('VCB') ? 'VCB' : loan.donVi}
+                          <td className="p-4 text-orange-300 text-right">{formatLoanMoney(loan.laiCongDon, loan.loaiTien)}</td>
+                          <td className={`p-4 text-center ${loan.donVi?.toUpperCase().includes('BIDV') ? 'text-blue-400 font-semibold' : loan.donVi?.toUpperCase().includes('VCB') ? 'text-green-400 font-semibold' : loan.donVi?.toUpperCase().includes('SEABANK') ? 'text-red-400 font-semibold' : 'text-gray-400'}`}>
+                             {loan.donVi?.toUpperCase().includes('BIDV') ? 'BIDV' : loan.donVi?.toUpperCase().includes('VCB') ? 'VCB' : loan.donVi?.toUpperCase().includes('SEABANK') ? 'SEABANK' : loan.donVi}
                           </td>
                         </tr>
                       ))
